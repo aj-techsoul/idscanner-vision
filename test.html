@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ELI IDScanner Test</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    #output { white-space: pre-wrap; background: #f8f8f8; padding: 1em; margin-top: 1em; border: 1px solid #ddd; }
+    input, button { margin: 10px 0; }
+  </style>
+</head>
+<body>
+
+  <h1>🔍 ELI IDScanner Plugin Test</h1>
+
+  <label>Select Image:
+    <input type="file" id="image" accept="image/*">
+  </label><br>
+
+  <label>Mode:
+    <select id="mode">
+      <option value="auto">Auto (default)</option>
+      <option value="online">Online (Google Vision)</option>
+      <option value="offline">Offline (Tesseract)</option>
+    </select>
+  </label>
+
+  <div id="output">Waiting for input...</div>
+
+  <!-- Load plugin -->
+  <script src="https://raw.githubusercontent.com/aj-techsoul/idscanner-vision/main/idscanner.js"></script>
+
+  <!-- Optional preload for offline use -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script> -->
+
+  <script>
+    const GOOGLE_VISION_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your Vision API key
+    const output = document.getElementById("output");
+
+    document.getElementById("image").addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      const mode = document.getElementById("mode").value;
+      if (!file) return;
+
+      output.textContent = "⏳ Processing image...";
+
+      const reader = new FileReader();
+      reader.onload = function () {
+        const base64 = reader.result;
+        eli.idscan({
+          image: base64,
+          mode: mode,
+          apiKey: GOOGLE_VISION_API_KEY,
+          success: function (data) {
+            output.textContent = JSON.stringify(data, null, 2);
+            console.log("✅ Structured Output:", data);
+          },
+          error: function (err) {
+            output.textContent = "❌ Error: " + err.message;
+            console.error("Scan error:", err);
+          }
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+
+</body>
+</html>
